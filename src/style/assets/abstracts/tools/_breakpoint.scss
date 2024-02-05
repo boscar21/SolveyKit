@@ -1,0 +1,109 @@
+@use '../../variables' as containerWidths;
+
+// Utility functions for breakpoints
+@function breakpoint-next($name, $breakpoints: containerWidths.$grid-breakpoints) {
+  $n: index(map-keys($breakpoints), $name);
+  @return if($n, nth(map-keys($breakpoints), $n + 1), null);
+}
+
+@function breakpoint-min($name, $breakpoints: containerWidths.$grid-breakpoints) {
+  $min: map-get($breakpoints, $name);
+  @return if($min != 0, $min, null);
+}
+
+@function breakpoint-max($name, $breakpoints: containerWidths.$grid-breakpoints) {
+  $max: map-get($breakpoints, $name);
+  @return if($max > 0, $max - 0.02, null);
+}
+
+
+@mixin media-up($name, $breakpoints: containerWidths.$grid-breakpoints) {
+  $min: breakpoint-min($name, $breakpoints);
+
+  @if $min {
+    @media (min-width: $min) {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@mixin media-down($name, $breakpoints: containerWidths.$grid-breakpoints) {
+  $max: breakpoint-max($name, $breakpoints);
+
+  @if $max {
+    @media (max-width: $max) {
+      @content;
+    }
+  } @else {
+    @content;
+  }
+}
+
+@mixin media-between($lower, $upper, $breakpoints: containerWidths.$grid-breakpoints) {
+  $min: breakpoint-min($lower, $breakpoints);
+  $max: breakpoint-max($upper, $breakpoints);
+
+  @if $min and $max {
+    @media (min-width: $min) and (max-width: $max) {
+      @content;
+    }
+  } @else if not $min {
+    @include media-up($lower, $breakpoints) {
+      @content;
+    }
+  } @else if not $max {
+    @include media-down($upper, $breakpoints) {
+      @content;
+    }
+  }
+}
+
+@mixin media-only($name, $breakpoints: containerWidths.$grid-breakpoints) {
+  $min: breakpoint-min($name, $breakpoints);
+  $max: breakpoint-max(breakpoint-next($name, $breakpoints), $breakpoints);
+
+  @if $min and $max {
+    @media (min-width: $min) and (max-width: $max) {
+      @content;
+    }
+  } @else if not $max {
+    @include media-up($name, $breakpoints) {
+      @content;
+    }
+  } @else if not $min {
+    @include media-down(breakpoint-next($name, $breakpoints), $breakpoints) {
+      @content;
+    }
+  }
+}
+
+
+
+@mixin make-media($breakpoint: null) {
+  $breakpoints: map-keys(containerWidths.$container-max-widths);
+  $breakpoint-index: index($breakpoints, $breakpoint);
+
+  @if $breakpoint-index {
+    @each $bp in $breakpoints {
+      $bp-index: index($breakpoints, $bp);
+
+      @if $bp-index and $breakpoint-index <= $bp-index {
+        $container-max-width: map-get(containerWidths.$container-max-widths, $bp);
+        @include media-up($bp) {
+          max-width: $container-max-width;
+          @content;
+        }
+      }
+    }
+  } @else {
+    @each $bp in $breakpoints {
+      $container-max-width: map-get(containerWidths.$container-max-widths, $bp);
+      @include media-up($bp) {
+        max-width: $container-max-width;
+        @content;
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+@use '../themes' as *;
+
+
+$themeNameRegister: (
+  'example-color-theme': $examplethemea,
+  'example-module-theme': $examplethemeb,    
+);  
+
+$themeKeyMappings: (
+    'cursor': 'cursor',
+    'textDecoration': 'text-decoration',
+    'paddingx': 'padding-left',
+);
+
+$fontProperties: (
+  'font-style': ('italic', 'oblique'),
+  'font-variant': ('small-caps'),
+  'font-variant-caps': ('all-small-caps', 'petite-caps', 'all-petite-caps', 'unicase', 'titling-caps'),
+  'font-stretch': ('ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed', 'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded'),
+  'font-weight': ('bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '900'),
+  // not implemented. I'm tired
+  'font-format': (
+    'woff': 'woff',
+    'woff2': 'woff2',
+    'ttf': 'truetype',
+    'eot?#iefix': 'embedded-opentype',
+  ),
+);

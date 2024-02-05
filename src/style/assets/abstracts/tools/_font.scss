@@ -1,0 +1,51 @@
+@use '../../variables' as family;
+
+@mixin make-font($values...) {
+  $properties: ();
+  $fontFamily: null;
+  $src: null;
+  $unrecognized: ();
+  $includeSrc: false;
+  @each $value in $values {
+    $recognized: false;
+    // Ha a $value megtalálható a $fontFamilyMap-ben, akkor beállítjuk a $fontFamily és $src változókat
+    @if map-has-key(family.$fontFamilyMap, $value) {
+      $fontFamily: $value;
+      $src: unquote(url(map-get(family.$fontFamilyMap, $value)));
+      $recognized: true;
+    } // Ha a $value 'src', akkor beállítjuk az $includeSrc változót igazra
+    @else if $value == 'src' {
+      $includeSrc: true;
+      $recognized: true;
+    } // Ellenkező esetben végigmegyünk a $fontProperties map-en, és ha a $value megtalálható a map-ben, akkor hozzáadjuk a $properties map-hez
+    @else {
+      @each $property, $map in family.$fontProperties {
+        @if index($map, $value) {
+          $properties: map-merge($properties, ($property: unquote($value)));
+          $recognized: true;
+        }
+      }
+    }
+    // Ha a $value nem ismert, akkor hozzáadjuk az $unrecognized listához
+    @if not $recognized {
+      $unrecognized: append($unrecognized, $value);
+    }
+  }
+  // Beállítjuk a font családot
+  font-family: $fontFamily;
+  // Ha az $includeSrc igaz, és a $src nem null, akkor beállítjuk a src-t
+  @if $includeSrc and $src {
+    src: $src;
+  }
+  // Végigmegyünk a $properties map-en, és beállítjuk a megfelelő tulajdonságokat
+  @each $property, $value in $properties {
+    #{$property}: #{$value};
+  }
+  // Ha vannak ismeretlen értékek, akkor konzolban kiiratjuk
+  @if length($unrecognized) > 0 {
+    @warn "Unrecognized values: #{join($unrecognized, ', ')}";
+  }
+}
+
+
+

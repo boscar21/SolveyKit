@@ -1,0 +1,66 @@
+@use '../../themes' as *;
+@use '../../variables' as *;
+
+$array-map: null;
+
+@function get($key) {
+  @return map-get($array-map, $key);
+}
+
+@function mapKeys($module) {
+  $mapped: ();
+  @each $key, $value in $module {
+    $property: map-get($themeKeyMappings, $key);
+    @if $property {
+      $mapped: map-merge($mapped, ($property: $value));
+    }
+  }
+  @return $mapped;
+} 
+
+@mixin make-module( $themeName, $moduleName: null) {
+    $theme: map-get($themeNameRegister, $themeName);
+    @if not $theme {
+      @warn "A(z) `#{$themeName}` téma nem található vagy nincs regisztrálva.";
+    } @else {
+      @if $moduleName {
+        $module: map-get($theme, $moduleName);
+        @if not $module {
+          @warn "A(z) `#{$moduleName}` modul nem található a(z) `#{$themeName}` témában.";
+        } @else {
+          .#{"" + $moduleName} & {
+            $mappedModule: mapKeys($module);
+            @each $property, $value in $mappedModule {
+              #{$property}: $value;
+            }
+          }
+        }
+      } @else {
+        @each $moduleName, $module in $theme {
+          .#{"" + $moduleName} & {
+            $mappedModule: mapKeys($module);
+            @each $property, $value in $mappedModule {
+              #{$property}: $value;
+            }
+          }
+        }
+      }
+    }
+  } 
+
+
+@mixin make-theme($arg: theme) {
+  $array: map-get($themeNameRegister, $arg);
+
+  @each $theme, $map in $array {
+    .#{"" + $theme} & {
+      $array-map: () !global;
+      @each $key, $submap in $map {
+        $value: map-get(map-get($array, $theme), '#{$key}');
+        $array-map: map-merge($array-map, ($key: $value)) !global;
+      }
+      @content;
+      $array-map: null !global;
+    }
+  }
+}

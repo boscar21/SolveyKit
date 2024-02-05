@@ -1,0 +1,13 @@
+@function switch($value: false) {
+    $trueValues: (true, enable, on, yes);
+    $falseValues: (false, disable, off, no);
+  
+    @if index($trueValues, $value) {
+      @return true;
+    } @else if index($falseValues, $value) {
+      @return false;
+    } @else {
+      @return false;
+    }
+  }
+  
